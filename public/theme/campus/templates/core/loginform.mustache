@@ -1,0 +1,413 @@
+{{
+    !This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template core/loginform
+
+    Moodle template for the login page.
+
+    Context variables required for this template:
+    * autofocusform: Auto focus on form ?,
+    * canloginasguest - Is guest login allowed?,
+    * canloginbyemail - Is login by email allowed?,
+    * cansignup - Signup allowed?,
+    * showloginform - Hide the standard login form if it not necessary (only OAuth2 for example)
+    * error - Any errors in the form?,
+    * errortitle - Optional bold heading shown above the error message (credential failures only),
+    * hasauthinstructions - Flag, set to true when auth_instructions is configured,
+    * info - Info notification to display,
+    * forgotpasswordurl - Forgot password url,
+    * hasidentityproviders - Flag, set to true to hide identity providers,
+    * identityproviders - List of identity providers,
+    * instructions - Instructions,
+    * loginurl - Login url,
+    * signupurl - Signup url,
+    * logourl - Flag, logo url,
+    * sitename - Name of site.,
+    * logintoken - Random token to protect login request.,
+    * maintenance - Maintenance message
+
+    Example context (json):
+    {
+        "autofocusform": false,
+        "canloginasguest": "1",
+        "canloginbyemail": false,
+        "cansignup": true,
+        "showloginform": true,
+        "error": "",
+        "errortitle": "",
+        "hasauthinstructions": false,
+        "info": "",
+        "forgotpasswordurl": "http://localhost/stable_master/login/forgot_password.php",
+        "hasidentityproviders": false,
+        "identityproviders": [],
+        "instructions": "For full access to this site, you first need to create an account.",
+        "loginurl": "http://localhost/stable_master/login/index.php",
+        "signupurl": "http://localhost/stable_master/login/signup.php",
+        "logourl": false,
+        "sitename": "Beer & Chips",
+        "logintoken": "randomstring",
+        "maintenance": "For full access to this site, you need to login in as an admin.",
+        "languagemenu": "Choose language",
+        "togglepassword": true,
+        "smallscreensonly": true
+    }
+}}
+
+<div class="campus-login-form">
+
+<div class="campus-login-logo">
+    <img
+        src="/theme/campus/pix/LogoAnt.png"
+        alt="Gobernación de Antioquia"
+    >
+</div>
+
+<div class="campus-login-header">
+    <h1>Iniciar Sesión</h1>
+    <p>Ingresa a tu cuenta para continuar</p>
+</div>
+
+    {{#maintenance}}
+        <div class="alert alert-danger login-maintenance">
+            {{{maintenance}}}
+        </div>
+    {{/maintenance}}
+
+    {{#error}}
+        <div class="alert alert-danger" id="loginerrormessage" role="alert">
+            {{#errortitle}}
+                <strong class="d-block mb-1">{{errortitle}}</strong>
+            {{/errortitle}}
+            {{error}}
+        </div>
+    {{/error}}
+
+    {{#info}}
+        <div class="alert alert-info" id="logininfomessage" role="status">
+            {{info}}
+        </div>
+    {{/info}}
+
+    {{#showloginform}}
+
+        <form class="campus-login-form-fields" action="{{loginurl}}" method="post" id="login">
+
+            <input id="anchor" type="hidden" name="anchor" value="">
+            <script>
+                document.getElementById('anchor').value = location.hash;
+            </script>
+
+            <input type="hidden" name="logintoken" value="{{logintoken}}">
+
+            <div class="campus-field">
+
+                <label for="username">
+
+                    {{^canloginbyemail}}
+                        {{#str}} username {{/str}}
+                    {{/canloginbyemail}}
+
+                    {{#canloginbyemail}}
+                        {{#str}} usernameemail {{/str}}
+                    {{/canloginbyemail}}
+
+                </label>
+
+                <input
+                    type="text"
+                    name="username"
+                    id="username"
+                    value="{{username}}"
+                    placeholder="{{^canloginbyemail}}{{#str}}enterusername{{/str}}{{/canloginbyemail}}{{#canloginbyemail}}{{#str}}loginenterusernameoremail{{/str}}{{/canloginbyemail}}"
+                    autocomplete="username"
+                    class="campus-input"
+                >
+
+            </div>
+
+            <div class="campus-field">
+
+                <label for="password">
+                    {{#str}} password {{/str}}
+                </label>
+
+                <input
+                    type="password"
+                    name="password"
+                    id="password"
+                    value=""
+                    placeholder="{{#str}}loginenterpassword{{/str}}"
+                    autocomplete="current-password"
+                    class="campus-input"
+                >
+
+            </div>
+
+            <div class="campus-forgot-password">
+                <a href="{{forgotpasswordurl}}">
+                    {{#str}}loginforgotpassword{{/str}}
+                </a>
+            </div>
+
+            {{#recaptcha}}
+                <div class="login-form-recaptcha mb-3">
+                    {{{recaptcha}}}
+                </div>
+            {{/recaptcha}}
+
+            <button
+                class="campus-login-button"
+                type="submit"
+                id="loginbtn"
+            >
+                <span>{{#str}}login{{/str}}</span>
+            </button>
+
+        </form>
+
+    {{/showloginform}}
+
+    {{#hasauthinstructions}}
+        <div class="campus-login-instructions d-lg-none">
+            {{{instructions}}}
+        </div>
+    {{/hasauthinstructions}}
+
+    {{^hasauthinstructions}}
+        {{#cansignup}}
+            <div class="campus-signup">
+                {{#instructions}}
+                    <span>{{{instructions}}}</span>
+                {{/instructions}}
+
+                <a href="{{signupurl}}">
+                    {{#str}}loginstartsignup{{/str}}
+                </a>
+            </div>
+        {{/cansignup}}
+
+        {{^cansignup}}
+            {{#instructions}}
+                <p class="campus-login-instructions">
+                    {{{instructions}}}
+                </p>
+            {{/instructions}}
+        {{/cansignup}}
+    {{/hasauthinstructions}}
+
+    {{#hasauthinstructions}}
+        {{#cansignup}}
+            <div class="campus-signup">
+                <a href="{{signupurl}}">
+                    {{#str}}loginstartsignup{{/str}}
+                </a>
+            </div>
+        {{/cansignup}}
+    {{/hasauthinstructions}}
+
+    {{#hasidentityproviders}}
+
+        <div class="campus-divider">
+            <span>{{#str}}loginseparatoror{{/str}}</span>
+        </div>
+
+        <div class="login-identityproviders">
+
+            {{#identityproviders}}
+
+                <a
+                    class="btn login-identityprovider-btn btn-outline-secondary mb-3"
+                    href="{{url}}"
+                >
+
+                    {{#iconurl}}
+                        <img src="{{iconurl}}" alt="" width="24" height="24">
+                    {{/iconurl}}
+
+                    {{#str}}loginwith, core, {{name}}{{/str}}
+
+                </a>
+
+            {{/identityproviders}}
+
+        </div>
+
+    {{/hasidentityproviders}}
+
+    {{#canloginasguest}}
+
+        <div class="campus-divider">
+            <span>{{#str}}loginseparatoror{{/str}}</span>
+        </div>
+
+        <form action="{{loginurl}}" method="post" id="guestlogin">
+
+            <input
+                type="hidden"
+                name="logintoken"
+                value="{{logintoken}}"
+            >
+
+            <input
+                type="hidden"
+                name="username"
+                value="guest"
+            >
+
+            <input
+                type="hidden"
+                name="password"
+                value="guest"
+            >
+
+            <button
+                class="btn btn-outline-secondary w-100"
+                type="submit"
+                id="loginguestbtn"
+            >
+                <i class="fa fa-user me-2" aria-hidden="true"></i>
+                {{#str}}loginasguest{{/str}}
+            </button>
+
+        </form>
+
+    {{/canloginasguest}}
+
+    {{#languagemenu}}
+
+        <div class="campus-language">
+            {{>core/action_menu}}
+        </div>
+
+    {{/languagemenu}}
+
+    <div class="campus-cookies">
+
+        <button
+            type="button"
+            class="btn btn-link p-0"
+            data-modal="alert"
+            data-modal-title-str='["cookiesenabled", "core"]'
+            data-modal-content-str='["cookiesenabled_help_html", "core"]'
+        >
+            {{#str}}cookiesnotice{{/str}}
+        </button>
+
+    </div>
+
+</div>
+
+{{#js}}
+
+    {{^error}}
+
+        {{#autofocusform}}
+
+            require(['core_form/events'], function(FormEvent) {
+
+                function autoFocus() {
+
+                    const userNameField = document.getElementById('username');
+                    const passwordField = document.getElementById('password');
+
+                    if (userNameField && userNameField.value.length == 0) {
+
+                        userNameField.focus();
+
+                    } else if (passwordField) {
+
+                        passwordField.focus();
+
+                    }
+
+                }
+
+                autoFocus();
+
+                window.addEventListener(
+                    FormEvent.eventTypes.fieldStructureChanged,
+                    autoFocus
+                );
+
+            });
+
+        {{/autofocusform}}
+
+    {{/error}}
+
+    require(['core/pending'], function(Pending) {
+
+        const errorMessageDiv =
+            document.getElementById('loginerrormessage');
+
+        const infoMessageDiv =
+            document.getElementById('logininfomessage');
+
+        const errorMessage =
+            errorMessageDiv?.textContent.trim();
+
+        const infoMessage =
+            infoMessageDiv?.textContent.trim();
+
+        if (errorMessage || infoMessage) {
+
+            const pendingJS =
+                new Pending('login-move-focus');
+
+            const usernameField =
+                document.getElementById('username');
+
+            setTimeout(function() {
+
+                if (errorMessage && usernameField) {
+                    usernameField.focus();
+                }
+
+                if (errorMessage) {
+                    errorMessageDiv.innerHTML += "&nbsp;";
+                }
+
+                if (infoMessage) {
+                    infoMessageDiv.innerHTML += "&nbsp;";
+                }
+
+                pendingJS.resolve();
+
+            }, 500);
+        }
+
+    });
+
+    {{#togglepassword}}
+
+        require(['core/togglesensitive'], function(ToggleSensitive) {
+            ToggleSensitive.init("password", {{smallscreensonly}});
+        });
+
+    {{/togglepassword}}
+
+    require(['core_form/submit'], function(Submit) {
+
+        Submit.init("loginbtn");
+
+        {{#canloginasguest}}
+            Submit.init("loginguestbtn");
+        {{/canloginasguest}}
+
+    });
+
+{{/js}}
